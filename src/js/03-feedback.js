@@ -1,48 +1,40 @@
 import throttle from 'lodash.throttle';
-
 const formEl = document.querySelector('.feedback-form');
-const FEEDBACK_KEY = "feedback-form-state";
-let parsetData = {};
+let userData = {};
 
-formEl.addEventListener('input', throttle(onInputHandler, 500));
-formEl.addEventListener('submit', onFormSubmitHandler);
-updateForm();
+formEl.addEventListener('input', throttle(onInput, 500));
+formEl.addEventListener('submit', onSubmit);
+window.addEventListener('load', onLoad);
 
-function onInputHandler(event) {
-    const emailValue = formEl.querySelector('input[name="email"]').value;
-    const messageValue = formEl.querySelector('textarea[name="message"]').value;
+const LOCAL_STORAGE_KEY = 'feedback-form-state';
 
-
-    parsetData = {
-       email: emailValue,
-       message: messageValue,
-    };
-
-    localStorage.setItem(FEEDBACK_KEY, JSON.stringify(parsetData))
+function onInput(e) {
+  const target = e.target;
+  const formElValue = target.value;
+  const formElName = target.name;
+  userData[formElName] = formElValue;
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(userData));
 }
 
-function onFormSubmitHandler(event) {
-    event.preventDefault();
-    const { email, message } = event.currentTarget.elements;
-
-    if (email.value === '' || message.value === '') {
-        return alert("All fields must be filed");
-    }
-
-    console.log({ email: email.value, message: message.value });
-
-    event.currentTarget.reset();
-    localStorage.removeItem(FEEDBACK_KEY);
-    parsetData = {};
+function onSubmit(e) {
+  e.preventDefault();
+  console.log(userData);
+  userData = {};
+  e.target.reset();
+  localStorage.removeItem(LOCAL_STORAGE_KEY);
 }
 
-function updateForm() {
-    const inputData = localStorage.getItem(FEEDBACK_KEY);
-    if (inputData) {
-        parsetData = JSON.parse(inputData);
-       
-        let { email, message } = formEl.elements;
-    email.value = parsetData.email || '';
-    message.value = parsetData.message || '';
+function onLoad() {
+  try {
+    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!data) return;
+    userData = JSON.parse(data);
+    for (const key in userData) {
+      if (userData.hasOwnProperty(key)) {
+        formEl.elements[key].value = userData[key];
+      }
     }
+  } catch (error) {
+    console.log(error.message);
+  }
 }
