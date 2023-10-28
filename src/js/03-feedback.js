@@ -9,8 +9,9 @@ formEl.addEventListener('submit', onFormSubmitHandler);
 updateForm();
 
 function onInputHandler(event) {
-    const emailValue = event.currentTarget.email.value;
-    const messageValue = event.currentTarget.message.value;
+    const emailValue = formEl.querySelector('input[name="email"]').value;
+    const messageValue = formEl.querySelector('textarea[name="message"]').value;
+
 
     parsetData = {
        email: emailValue,
